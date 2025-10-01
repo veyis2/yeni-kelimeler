@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kelime Oyunu</title>
+<style>
+  body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background-color: #f0f0f0; }
+  #wordBox { font-size: 2em; margin: 30px; color: #333; }
+  button { font-size: 1.2em; padding: 10px 20px; cursor: pointer; margin: 5px; }
+  input { font-size: 1em; padding: 5px; width: 50px; }
+</style>
+</head>
+<body>
+
+<h1>Kelime Oyunu</h1>
+<div id="wordBox">Başlamak için Başla'ya tıkla</div>
+
+<label>Her kelimeyi kaç kez tekrar etsin? 
+  <input type="number" id="repeatCount" value="2" min="1">
+</label><br><br>
+
+<button id="startBtn">Başla</button>
+<div id="counter">Kelime: 0 | Tekrar: 0</div>
+
+<script>
+const startBtn = document.getElementById('startBtn');
+const wordBox = document.getElementById('wordBox');
+const counterDisplay = document.getElementById('counter');
+const repeatInput = document.getElementById('repeatCount');
+
+// Örnek kelimeler
+const words = [
+  // 1. Sayfa
+  {en: "Car", tr: "Araba"},
+  {en: "Apple", tr: "Elma"},
+  {en: "Day", tr: "Gün"},
+  {en: "Flower", tr: "Çiçek"},
+  {en: "Jacket", tr: "Ceket"},
+  {en: "Wrist", tr: "Bilek"},
+  {en: "Tree", tr: "Ağaç"},
+  {en: "Blue", tr: "Mavi"},
+  {en: "White", tr: "Beyaz"},
+  {en: "Seven", tr: "Yedi"},
+  {en: "Game", tr: "Oyun"},
+  {en: "Picture", tr: "Resim"},
+  {en: "Phone", tr: "Telefon"},
+  {en: "Fish", tr: "Balık"},
+  {en: "Bag", tr: "Çanta"},
+  {en: "Jewelry", tr: "Takı"},
+  {en: "Watch / Clock", tr: "Saat"},
+  {en: "Scarf", tr: "Atkı"},
+  {en: "Dress", tr: "Elbise"},
+  {en: "Class", tr: "Sınıf"},
+  {en: "Computer", tr: "Bilgisayar"},
+  {en: "Closet / Wardrobe", tr: "Dolap"},
+  {en: "Scissors", tr: "Makas"},
+  {en: "Toy", tr: "Oyuncak"},
+  {en: "Necklace", tr: "Kolye"},
+  {en: "Pants / Trousers", tr: "Pantolon"},
+  {en: "Pencil", tr: "Kalem"},
+  {en: "Glasses", tr: "Gözlük"},
+  {en: "Pink", tr: "Pembe"},
+  {en: "Armchair / Sofa", tr: "Koltuk"},
+  {en: "Board", tr: "Tahta"},
+  {en: "Lamp", tr: "Lamba"},
+  {en: "Eraser", tr: "Silgi"},
+  {en: "Bread", tr: "Ekmek"},
+  {en: "Notebook", tr: "Defter"},
+  {en: "Mother", tr: "Anne"},
+  {en: "May", tr: "Mayıs"},
+  {en: "Winter", tr: "Kış"},
+  {en: "Tuesday", tr: "Salı"},
+  {en: "Slipper", tr: "Terlik"},
+  {en: "Spring", tr: "İlkbahar"},
+  {en: "Shoes", tr: "Ayakkabı"},
+  {en: "Television", tr: "Televizyon"},
+  {en: "Grandparents", tr: "Büyükanne ve Büyükbaba"},
+  {en: "One", tr: "Bir"},
+  {en: "Nine", tr: "Dokuz"},
+  {en: "Knife", tr: "Bıçak"},
+  {en: "Water", tr: "Su"},
+  {en: "Five", tr: "Beş"},
+  {en: "Paper towel", tr: "Kağıt havlu"},
+  {en: "Zero", tr: "Sıfır"},
+  {en: "Father", tr: "Baba"},
+  {en: "Sunday", tr: "Pazar"},
+  {en: "Yellow", tr: "Sarı"},
+  {en: "Germany", tr: "Almanya"},
+  {en: "Glass", tr: "Bardak"},
+  {en: "Banana", tr: "Muz"},
+  {en: "Friday", tr: "Cuma"},
+  {en: "Green", tr: "Yeşil"},
+
+  // 2. Sayfa
+  {en: "Door", tr: "Kapı"},
+  {en: "Red", tr: "Kırmızı"},
+  {en: "Sugar", tr: "Şeker"},
+  {en: "Summer", tr: "Yaz"},
+  {en: "Monday", tr: "Pazartesi"},
+  {en: "Home", tr: "Ev"},
+  {en: "Friend", tr: "Arkadaş"},
+  {en: "April", tr: "Nisan"},
+  {en: "Four", tr: "Dört"},
+  {en: "Orange", tr: "Portakal"},
+  {en: "Spoon", tr: "Kaşık"},
+  {en: "Sister", tr: "Kız kardeş"},
+  {en: "Eight", tr: "Sekiz"},
+  {en: "Eye", tr: "Göz"},
+  {en: "Switzerland", tr: "İsviçre"},
+  {en: "January", tr: "Ocak"},
+  {en: "October", tr: "Ekim"},
+  {en: "French", tr: "Fransızca / Fransız"},
+  {en: "Umbrella", tr: "Şemsiye"},
+  {en: "Boat", tr: "Bot / Tekne"},
+  {en: "Change office", tr: "Döviz bürosu"},
+  {en: "Public transportation", tr: "Toplu taşıma"},
+  {en: "Airport", tr: "Havalimanı"},
+
+  // 3. Sayfa
+  {en: "Older sister", tr: "Abla"},
+  {en: "July", tr: "Temmuz"},
+  {en: "March", tr: "Mart"},
+  {en: "Autumn", tr: "Sonbahar"},
+  {en: "Wednesday", tr: "Çarşamba"},
+  {en: "Gray", tr: "Gri"},
+  {en: "Italian", tr: "İtalyan / İtalya ile ilgili"},
+  {en: "June", tr: "Haziran"},
+  {en: "Passport", tr: "Pasaport"},
+  {en: "Booking", tr: "Rezervasyon"},
+  {en: "Ten", tr: "On"},
+  {en: "Uncle", tr: "Amca / Dayı"},
+  {en: "December", tr: "Aralık"},
+  {en: "Two", tr: "İki"},
+  {en: "Black", tr: "Siyah"},
+  {en: "Brother", tr: "Erkek kardeş"},
+  {en: "Drinks", tr: "İçecekler"},
+  {en: "Grocery", tr: "Bakkal / Market alışverişi"},
+  {en: "Elevator", tr: "Asansör"},
+  {en: "September", tr: "Eylül"},
+  {en: "Suitcase", tr: "Bavul"},
+  {en: "Nationality", tr: "Milliyet"},
+  {en: "Fork", tr: "Çatal"},
+  {en: "Bakery", tr: "Fırın"},
+  {en: "Room", tr: "Oda"},
+  {en: "Fridge", tr: "Buzdolabı"},
+  {en: "Navigation", tr: "Navigasyon"},
+  {en: "Stairs", tr: "Merdiven"},
+  {en: "Coffee", tr: "Kahve"},
+  {en: "February", tr: "Şubat"},
+  {en: "Daughter", tr: "Kız evlat"},
+  {en: "Son", tr: "Erkek evlat"},
+  {en: "Father-in-law", tr: "Kayınpeder"},
+  {en: "Mother-in-law", tr: "Kayınvalide"},
+  {en: "Little sister", tr: "Küçük kız kardeş"},
+  {en: "Little brother", tr: "Küçük erkek kardeş"},
+  {en: "Older", tr: "Daha yaşlı / büyük"},
+  {en: "Elder", tr: "Büyük / yaşlı"},
+  {en: "Daughter-in-law", tr: "Gelin"},
+  {en: "Son-in-law", tr: "Damat"},
+  {en: "Bride", tr: "Gelin"},
+  {en: "Groom", tr: "Damat"},
+
+  // Sıfatlar
+  {en: "Big", tr: "Büyük"},
+  {en: "Good", tr: "İyi"},
+  {en: "Full", tr: "Dolu"},
+  {en: "Hard", tr: "Zor"},
+  {en: "Safe", tr: "Güvenli"},
+  {en: "Clever", tr: "Zeki"},
+  {en: "Small", tr: "Küçük"},
+  {en: "Light", tr: "Açık (Hafif)"},
+  {en: "Stupid", tr: "Aptal"},
+  {en: "Early", tr: "Erken"},
+  {en: "Fast", tr: "Hızlı"},
+  {en: "Dangerous", tr: "Tehlikeli"},
+  {en: "Thin", tr: "İnce / Zayıf"},
+  {en: "High", tr: "Yüksek"},
+  {en: "Dark", tr: "Koyu (Karalık)"},
+  {en: "Fat", tr: "Şişman / Kilolu"},
+  {en: "Slow", tr: "Yavaş"},
+  {en: "Late", tr: "Geç"},
+  {en: "Hot", tr: "Sıcak"},
+  {en: "Easy", tr: "Kolay"},
+  {en: "Empty", tr: "Boş"},
+  {en: "Bad", tr: "Kötü"},
+  {en: "Interesting", tr: "İlginç (Dikkat çekici)"},
+  {en: "Interested", tr: "Dikkati çekilmiş"},
+  {en: "Low", tr: "Alçak"},
+  {en: "Cold", tr: "Soğuk"},
+  {en: "Boring", tr: "Sıkıcı"},
+  {en: "Hardworking", tr: "Çalışkan"},
+  {en: "Lazy", tr: "Tembel"},
+  {en: "Far", tr: "Uzak"},
+  {en: "Quiet", tr: "Sessiz"},
+  {en: "Near", tr: "Yakın"},
+  {en: "Noisy", tr: "Gürültülü"},
+  {en: "Young", tr: "Genç"},
+  {en: "Sad", tr: "Üzgün"},
+  {en: "Old", tr: "Yaşlı (Eski)"},
+  {en: "Different", tr: "Farklı"},
+  {en: "Happy", tr: "Mutlu"},
+  {en: "Same", tr: "Aynı"},
+  {en: "New", tr: "Yeni"},
+  {en: "Expensive", tr: "Pahalı"},
+  {en: "Cheap", tr: "Ucuz"},
+  {en: "Rich", tr: "Zengin"},
+  {en: "Poor", tr: "Fakir"},
+  {en: "Ill", tr: "Hasta"},
+  {en: "Healthy", tr: "Sağlıklı"}
+];
+	
+let index = 0;
+let repeatCounter = 0;
+let repeatLimit = 1;
+
+function speak(text, lang, callback) {
+  let utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = lang;
+  utterance.rate = 1; // normal hız
+  utterance.onend = callback;
+  speechSynthesis.speak(utterance);
+}
+
+function showWord(word) {
+  wordBox.innerHTML = `<h3>${word.en} → ${word.tr}</h3>`;
+}
+
+function startReading() {
+  index = 0;
+  repeatLimit = parseInt(repeatInput.value) || 1;
+  repeatCounter = 0;
+  readNext();
+}
+
+function readNext() {
+  if (index >= words.length) return;
+
+  let word = words[index];
+  showWord(word);
+  counterDisplay.textContent = `Kelime: ${index+1}/${words.length} | Tekrar: ${repeatCounter+1}/${repeatLimit}`;
+
+  // İngilizce oku
+  speak(word.en, "en-US", () => {
+    // Türkçe oku
+    setTimeout(() => {
+      speak(word.tr, "tr-TR", () => {
+        repeatCounter++;
+        if (repeatCounter < repeatLimit) {
+          setTimeout(readNext, 500); // tekrar aynı kelime
+        } else {
+          repeatCounter = 0;
+          index++;
+          setTimeout(readNext, 800); // sonraki kelime
+        }
+      });
+    }, 400);
+  });
+}
+
+startBtn.addEventListener("click", startReading);
+</script>
+</body>
+</html>
